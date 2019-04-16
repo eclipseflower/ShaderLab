@@ -1,8 +1,11 @@
-﻿// 画一个波纹距离场
-Shader "Custom/WaveShader" {
+﻿// 画一个圆角矩形
+Shader "Custom/RingShader" {
 	Properties {
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
-		_Sparse("Sparse", Range(1, 100)) = 1.0
+		_PlotX("Plot X", Range(0, 0.5)) = 0.1
+		_PlotY("Plot Y", Range(0, 0.5)) = 0.1
+		_Radius("Radius", Range(0, 0.5)) = 0.1
+		_Thickness("Thickness", Range(0, 1.0)) = 0.2
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -17,7 +20,10 @@ Shader "Custom/WaveShader" {
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			float _Sparse;
+			float _PlotX;
+			float _PlotY;
+			float _Radius;
+			float _Thickness;
 
 			struct a2v
 			{
@@ -42,7 +48,9 @@ Shader "Custom/WaveShader" {
 
 			fixed4 frag(v2f i) : SV_TARGET
 			{
-				fixed c = frac(length(i.tex) * _Sparse);
+				float2 vec = max(abs(i.tex) - float2(_PlotX, _PlotY), 0);
+				float d = length(vec);
+				fixed c = smoothstep((1.0 - _Thickness) * _Radius, _Radius, d) * smoothstep(1.1 * _Radius, _Radius, d);
 				return fixed4(c, c, c, 1.0);
 			}
 
